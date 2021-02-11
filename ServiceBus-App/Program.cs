@@ -8,8 +8,10 @@ namespace ServiceBusApp
     class Program
     {
         private const string ConnectionString =
-            "Endpoint=sb://servicebusrobineu.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=DlR/9l+hwwJmVVarJOH4exvh9/b1nzhufzIA73jK+oc=";
+            "yes i included the string but it does not matter for this app :p";
         private const string QueueName = "ServiceBusRobinQueue";
+        private const string TopicName = "TopicRobin";
+        private const string SubscriptionName = "SubscriptionTopicRobin";
 
         // Singleton pattern
         static ServiceBusClient Client;
@@ -28,7 +30,7 @@ namespace ServiceBusApp
             get
             {
                 // create a sender for the queue 
-                return Sender ??= ClientGet.CreateSender(QueueName);
+                return Sender ??= ClientGet.CreateSender(TopicName);
             }
         }
 
@@ -44,24 +46,31 @@ namespace ServiceBusApp
 
         static async Task Main(string[] args)
         {
+            //// send a message to the queue
+            //await SendMessageAsync(QueueName);
+
+            //// send a batch of messages to the queue
+            //await SendMessageBatchAsync(QueueName);
+
+            //// receive message from the queue
+            //await ReceiveMessagesAsync();
+
+
+
             // send a message to the queue
-            await SendMessageAsync();
+            await SendMessageAsync(TopicName);
 
-            // send a batch of messages to the queue
-            await SendMessageBatchAsync();
-
-            // receive message from the queue
-            await ReceiveMessagesAsync();
+            await SendMessageBatchAsync(TopicName);
         }
 
-        static async Task SendMessageAsync()
+        static async Task SendMessageAsync(string queueOrTopic)
         {
             // create a message that we can send
             var message = new ServiceBusMessage("Hello world!");
 
             // send the message
-            await SenderGet.SendMessageAsync(message);
-            Console.WriteLine($"Sent a single message to the queue: {QueueName}");
+            await SenderGet.SendMessageAsync(new ServiceBusMessage("Hello, World!"));
+            Console.WriteLine($"Sent a single message to the queue: {queueOrTopic}");
         }
 
         static Queue<ServiceBusMessage> CreateMessages()
@@ -74,7 +83,7 @@ namespace ServiceBusApp
             return messages;
         }
 
-        static async Task SendMessageBatchAsync()
+        static async Task SendMessageBatchAsync(string queueOrTopic)
         {
             // get the messages to be sent to the Service Bus queue
             var messages = CreateMessages();
@@ -111,7 +120,7 @@ namespace ServiceBusApp
                 await SenderGet.SendMessagesAsync(messageBatch);
 
                 // if there are any remaining messages in the .NET queue, the while loop repeats 
-                Console.WriteLine($"Sent a batch of {messageCount} messages to the topic: {QueueName}");
+                Console.WriteLine($"Sent a batch of {messageCount} messages to the topic: {queueOrTopic}");
             }
         }
 
